@@ -1,3 +1,4 @@
+from re import S
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -615,6 +616,10 @@ class NLayerDiscriminatorMulti(nn.Module):
                 norm_layer(ndf * nf_mult),
                 nn.LeakyReLU(0.2, True)
             ]
+            
+        self.base = nn.Sequential(*sequence)
+
+        sequence = []
 
         nf_mult_prev = nf_mult
         nf_mult = min(2 ** n_layers, 8)
@@ -628,10 +633,8 @@ class NLayerDiscriminatorMulti(nn.Module):
         self.model1 = nn.Sequential(*sequence)
 
         sequence = []
-        sequence = [nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]
-        nf_mult = 1
-        nf_mult_prev = 1
-        for n in range(1, n_layers+2):  # gradually increase the number of filters
+
+        for n in range(n_layers, n_layers+2):  # gradually increase the number of filters
             nf_mult_prev = nf_mult
             nf_mult = min(2 ** n, 8)
             sequence += [
@@ -650,11 +653,13 @@ class NLayerDiscriminatorMulti(nn.Module):
 
         sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         self.model2 = nn.Sequential(*sequence)
+        
+
 
 
     def forward(self, input):
         """Standard forward."""
-        return [self.model1(input), self.model2(input)]
+        return [self.model1(self.base(input)), self.model2(self.base(input))]
 
 
 class PixelDiscriminator(nn.Module):
