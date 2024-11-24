@@ -636,7 +636,7 @@ class NLayerDiscriminatorMulti(nn.Module):
         sequence = []
 
         nf_mult = nf_mult_base
-        for n in range(n_layers, n_layers+4):  # gradually increase the number of filters
+        for n in range(n_layers, n_layers+3):  # gradually increase the number of filters
             nf_mult_prev = nf_mult
             nf_mult = min(2 ** n, 8)
             sequence += [
@@ -646,7 +646,7 @@ class NLayerDiscriminatorMulti(nn.Module):
             ]
 
         nf_mult_prev = nf_mult
-        nf_mult = min(2 ** (n_layers+4), 8)
+        nf_mult = min(2 ** (n_layers+3), 8)
         sequence += [
             nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=1, padding=padw, bias=use_bias),
             norm_layer(ndf * nf_mult),
