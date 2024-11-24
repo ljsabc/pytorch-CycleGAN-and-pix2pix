@@ -175,9 +175,19 @@ class CycleGANModel(BaseModel):
             self.loss_idt_B = 0
 
         # GAN loss D_A(G_A(A))
-        self.loss_G_A = self.criterionGAN(self.netD_A(self.fake_B), True)
+        pred_fakeB = self.netD_A(self.fake_B)
+        if type(pred_fakeB) == list:
+            # targeting more towards higher-resolution classifications
+            self.loss_G_A = self.criterionGAN(pred_fakeB[0], True) + self.criterionGAN(pred_fakeB[1], True) * 2
+        else:
+            self.loss_G_A = self.criterionGAN(pred_fakeB, True)
         # GAN loss D_B(G_B(B))
-        self.loss_G_B = self.criterionGAN(self.netD_B(self.fake_A), True)
+        pred_fakeA = self.netD_B(self.fake_A)
+        if type(pred_fakeA) == list:
+            # targeting more towards higher-resolution classifications
+            self.loss_G_B = self.criterionGAN(pred_fakeA[0], True) + self.criterionGAN(pred_fakeA[1], True) * 2
+        else:
+            self.loss_G_B = self.criterionGAN(pred_fakeA, True)
         # Forward cycle loss || G_B(G_A(A)) - A||
         self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A * 0.1
         # Backward cycle loss || G_A(G_B(B)) - B||
