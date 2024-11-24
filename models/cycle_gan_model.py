@@ -132,14 +132,14 @@ class CycleGANModel(BaseModel):
         pred_real = netD(real)
         if type(pred_real) == list:
             # targeting more towards higher-resolution classifications
-            loss_D_real = (self.criterionGAN(pred_real[0], True) + self.criterionGAN(pred_real[1], True) * 2) * 0.5
+            loss_D_real = (self.criterionGAN(pred_real[0], True) + self.criterionGAN(pred_real[1], True) * 2)
         else:
             loss_D_real = self.criterionGAN(pred_real, True)
         # Fake
         pred_fake = netD(fake.detach())
         if type(pred_fake) == list:
             # targeting more towards higher-resolution classifications
-            loss_D_fake = (self.criterionGAN(pred_fake[0], False) + self.criterionGAN(pred_fake[1], False) * 2) * 0.5
+            loss_D_fake = (self.criterionGAN(pred_fake[0], False) + self.criterionGAN(pred_fake[1], False) * 2)
         else:
             loss_D_fake = self.criterionGAN(pred_fake, False)
         # Combined loss and calculate gradients
@@ -159,7 +159,7 @@ class CycleGANModel(BaseModel):
 
     def backward_G(self):
         """Calculate the loss for generators G_A and G_B"""
-        lambda_idt = self.opt.lambda_identity * 0.5
+        lambda_idt = self.opt.lambda_identity
         lambda_A = self.opt.lambda_A
         lambda_B = self.opt.lambda_B
         # Identity loss
@@ -178,14 +178,14 @@ class CycleGANModel(BaseModel):
         pred_fakeB = self.netD_A(self.fake_B)
         if type(pred_fakeB) == list:
             # targeting more towards higher-resolution classifications
-            self.loss_G_A = (self.criterionGAN(pred_fakeB[0], True) + self.criterionGAN(pred_fakeB[1], True) * 2) * 0.5
+            self.loss_G_A = (self.criterionGAN(pred_fakeB[0], True) + self.criterionGAN(pred_fakeB[1], True) * 2)
         else:
             self.loss_G_A = self.criterionGAN(pred_fakeB, True)
         # GAN loss D_B(G_B(B))
         pred_fakeA = self.netD_B(self.fake_A)
         if type(pred_fakeA) == list:
             # targeting more towards higher-resolution classifications
-            self.loss_G_B = (self.criterionGAN(pred_fakeA[0], True) + self.criterionGAN(pred_fakeA[1], True) * 2) * 0.5
+            self.loss_G_B = (self.criterionGAN(pred_fakeA[0], True) + self.criterionGAN(pred_fakeA[1], True) * 2)
         else:
             self.loss_G_B = self.criterionGAN(pred_fakeA, True)
         # Forward cycle loss || G_B(G_A(A)) - A||
