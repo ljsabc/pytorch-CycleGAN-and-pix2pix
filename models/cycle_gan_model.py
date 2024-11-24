@@ -1,3 +1,4 @@
+from calendar import TUESDAY
 import torch
 import itertools
 from util.image_pool import ImagePool
@@ -129,10 +130,18 @@ class CycleGANModel(BaseModel):
         """
         # Real
         pred_real = netD(real)
-        loss_D_real = self.criterionGAN(pred_real, True)
+        if type(pred_real) == list:
+            # targeting more towards higher-resolution classifications
+            loss_D_real = self.criterionGAN(pred_real[0], True) + self.criterionGAN(pred_real[1], True) * 2
+        else:
+            loss_D_real = self.criterionGAN(pred_real, True)
         # Fake
         pred_fake = netD(fake.detach())
-        loss_D_fake = self.criterionGAN(pred_fake, False)
+        if type(pred_fake) == list:
+            # targeting more towards higher-resolution classifications
+            loss_D_fake = self.criterionGAN(pred_fake[0], False) + self.criterionGAN(pred_fake[1], False) * 2
+        else:
+            loss_D_fake = self.criterionGAN(pred_fake, False)
         # Combined loss and calculate gradients
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         loss_D.backward()
